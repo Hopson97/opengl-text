@@ -16,12 +16,12 @@ struct Mesh {
 };
 
 //Adapted from https://github.com/SFML/SFML/blob/master/src/SFML/Graphics/Text.cpp
-// void addGlyphQuad
+// void addGlyphQuad and ensureGeometryUpdate
 void addCharacter(Mesh &mesh, const sf::Glyph &glyph, char c,
                   const sf::Vector2u &imageSize, const sf::Vector2f& position, float maxHeight)
 {
     const std::string HALF_DOWN = "yqjpgQ()[]{}@\\/";
-    const std::string FLIP_POS  = "\"'";
+    const std::string FLIP_POS  = "\"'*^";
 
     float width = static_cast<float>(imageSize.x);
     float height = static_cast<float>(imageSize.y);
@@ -137,7 +137,7 @@ Application::Application(sf::Window &window)
 
     m_texture.create("logo");
 
-    std::string test = "Did I ever tell you?\nThe \"story\"!?\n'The quick brown fox jumps over the lazy dog'!![]\n()\n{}\nTHE QUICK BROWN FOX JUMPED OVER THE LAZY DOG.\n-=_+@~#/\\";
+    std::string test = "Did I ever tell you?\nThe \"story\"!?\n'The quick brown fox jumps over the lazy, bad dog'!![]\n()\n{}\nTHE QUICK BROWN FOX JUMPED OVER THE LAZY DOG.\n-=_+@~$£!/\\*<>,#";
     m_font.loadFromFile("res/ubuntu.ttf");
     m_text = createText(m_font, test, 32);
 }
