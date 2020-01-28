@@ -17,6 +17,17 @@ struct Mesh {
 
 //Adapted from https://github.com/SFML/SFML/blob/master/src/SFML/Graphics/Text.cpp
 // void addGlyphQuad and ensureGeometryUpdate
+
+/**
+ * @brief Creates a quad that contains a character, and adds to a mesh
+ * 
+ * @param mesh The mesh to add the character to
+ * @param glyph The glyph being added
+ * @param c The character being added
+ * @param imageSize The size of the texture atlas
+ * @param position The world position to put this char at
+ * @param maxHeight The maximum height of the chars
+ */
 void addCharacter(Mesh &mesh, const sf::Glyph &glyph, char c,
                   const sf::Vector2u &imageSize, const sf::Vector2f& position, float maxHeight)
 {
@@ -49,14 +60,14 @@ void addCharacter(Mesh &mesh, const sf::Glyph &glyph, char c,
         bottom += maxHeight;
     }
 
-    //Find the texture coords in the texture
+    // Find the texture coords in the texture
     float texLeft = (static_cast<float>(glyph.textureRect.left) - pad) / width;
     float texRight = (static_cast<float>(glyph.textureRect.left + glyph.textureRect.width) + pad) / width;
-
     float texTop = (static_cast<float>(glyph.textureRect.top) - pad) / height;
     float texBottom  = (static_cast<float>(glyph.textureRect.top + glyph.textureRect.height) + pad) / height;
     std::swap(texTop, texBottom);
 
+    // Add the vertex positions to the mesh
     float scale = 256;
     mesh.vertices.insert(mesh.vertices.end(), {
         (position.x + left) / scale,  (position.y + top) / scale,
@@ -65,12 +76,15 @@ void addCharacter(Mesh &mesh, const sf::Glyph &glyph, char c,
         (position.x + left) / scale, (position.y + bottom) / scale,
     });
 
+    // Add the textrue coords to the mesh
     mesh.textureCoords.insert(mesh.textureCoords.end(), {
         texLeft, texTop,
         texRight, texTop,
         texRight, texBottom,
         texLeft, texBottom,
     });
+
+    // Add indices to the mesh
     mesh.indices.push_back(mesh.icount);
     mesh.indices.push_back(mesh.icount + 1);
     mesh.indices.push_back(mesh.icount + 2);
