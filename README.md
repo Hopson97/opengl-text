@@ -26,6 +26,25 @@ Text as row of text, except the image texture seems to be upsidedown flipped.
 
 [Commit](https://github.com/Hopson97/opengl-text/commit/5813c3f56e0b1a9246035c2a2f367a5d224d7969)
 
+
+____
+
+Finally worked out texture coords except a lot of characters were positioned incorrectly
+
+![All Letters](https://i.imgur.com/hVicTD8g.png)
+
+Punctuation especially:
+
+![Punctuation](https://i.imgur.com/jndDELM.png)
+
+So added a bunch of hacky edge cases :/
+
+Kinda works but idk prob is a better way:
+
+[Final](https://cdn.discordapp.com/attachments/113418926909644800/671844350854168596/unknown.png)
+
+
+
 ## Building and Running
 
 ### Libraries
