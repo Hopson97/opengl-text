@@ -12,6 +12,12 @@ Text loaded to a texture:
 
 ___
 
+Text rendered as a single vertex array, one character per quad.
+
+![Text rendered to a quad](https://i.imgur.com/zY42eof.png)
+
+[Commit](https://github.com/Hopson97/opengl-text/tree/e1a90a02a6b6a542813535ff324d2886910b04af)
+
 ## Building and Running
 
 ### Libraries
