@@ -54,4 +54,6 @@ class Application {
 
     sf::Font m_font;
     gl::Texture2d m_fontTexture;
+
+    bool m_isMouseLocked = false;
 };

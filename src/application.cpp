@@ -37,11 +37,16 @@ Application::Application(sf::Window &window)
 
     m_font.loadFromFile("res/ubuntu.ttf");
 
-    std::string test = "Hello world!\n";
+    std::string test = "Hello world!";
 
     for (auto c : test) {
-        m_font.getGlyph(c, 10, false);
+        m_font.getGlyph(c, 64, false);
     }
+    auto &tex = m_font.getTexture(64);
+    auto image = tex.copyToImage();
+    image.flipVertically();
+    // image.flipHorizontally();
+    m_fontTexture.create(image);
 }
 
 void Application::run()
@@ -80,6 +85,10 @@ void Application::onEvent(sf::Event e)
                     m_window.close();
                     break;
 
+                case sf::Keyboard::L:
+                    m_isMouseLocked = !m_isMouseLocked;
+                    break;
+
                 default:
                     break;
             }
@@ -92,15 +101,17 @@ void Application::onEvent(sf::Event e)
 
 void Application::onInput()
 {
-    static auto lastMousePosition = sf::Mouse::getPosition(m_window);
-    auto change = sf::Mouse::getPosition(m_window) - lastMousePosition;
-    player.rot.x += static_cast<float>(change.y / 10);
-    player.rot.y += static_cast<float>(change.x / 10);
-    sf::Mouse::setPosition({static_cast<int>(m_window.getSize().x / 2),
-                            static_cast<int>(m_window.getSize().y / 2)},
-                           m_window);
-    lastMousePosition = sf::Mouse::getPosition(m_window);
-    player.rot.x = glm::clamp(player.rot.x, -170.0f, 170.0f);
+    if (!m_isMouseLocked) {
+        static auto lastMousePosition = sf::Mouse::getPosition(m_window);
+        auto change = sf::Mouse::getPosition(m_window) - lastMousePosition;
+        player.rot.x += static_cast<float>(change.y / 10);
+        player.rot.y += static_cast<float>(change.x / 10);
+        sf::Mouse::setPosition({static_cast<int>(m_window.getSize().x / 2),
+                                static_cast<int>(m_window.getSize().y / 2)},
+                               m_window);
+        lastMousePosition = sf::Mouse::getPosition(m_window);
+        player.rot.x = glm::clamp(player.rot.x, -170.0f, 170.0f);
+    }
 
     // Input
     const float SPEED = 0.05f;
@@ -136,7 +147,7 @@ void Application::onRender()
     gl::loadUniform(m_quadShader.modelLocation, modelMatrix);
 
     // Render
-    m_texture.bind();
+    m_fontTexture.bind();
     m_quad.bind();
     m_quad.getDrawable().bindAndDraw();
 }

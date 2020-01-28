@@ -1,6 +1,12 @@
 # gltexttest
 
-description here
+Testing to see if I can get opengl text rendering using sfml as a font loader.
+
+## Progress
+
+Text loaded to a texture:
+
+https://i.imgur.com/LdkzzWk.png
 
 ## Building and Running
 
