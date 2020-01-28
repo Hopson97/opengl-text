@@ -21,7 +21,6 @@ constexpr float PI = 3.14159;
 constexpr float ACCELERATION = 0.4f;
 constexpr float ACCELERATION_DAMP = 0.85f;
 
-
 struct Text {
     gl::VertexArray vao;
     gl::Texture2d fontTexture;

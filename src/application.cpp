@@ -6,33 +6,76 @@
 #include "gl/primitive.h"
 #include "maths.h"
 
-
-Text createText(const sf::Font& font, const std::string str, int size)
-{
+struct Mesh {
     std::vector<GLfloat> vertices;
     std::vector<GLfloat> textureCoords;
     std::vector<GLuint> indices;
+    GLuint icount = 0;
+};
 
+void addCharacter(Mesh &mesh, const sf::Glyph &glyph,
+                  const sf::Vector2u &imageSize)
+{
+    float width = static_cast<float>(imageSize.x);
+    float height = static_cast<float>(imageSize.y);
 
-    Text text;
+    float pad = 1.0f;
+
+    float left = glyph.bounds.left - pad;
+    float top = glyph.bounds.top - pad;
+    float right = glyph.bounds.left + glyph.bounds.width + pad;
+    float bottom = glyph.bounds.top + glyph.bounds.height + pad;
+
+    float u1 = (static_cast<float>(glyph.textureRect.left) - pad) / width;
+    float u2 = (static_cast<float>(glyph.textureRect.left + glyph.textureRect.width) + pad) / width;
+
+    float v1 = (static_cast<float>(glyph.textureRect.top) - pad) / height;
+    float v2  = (static_cast<float>(glyph.textureRect.top + glyph.textureRect.height) + pad) / height;
+
+    mesh.vertices.insert(mesh.vertices.end(), {
+        left, top,
+        right, top,
+        right, bottom,
+        left, bottom
+    });
+
+    mesh.textureCoords.insert(mesh.textureCoords.end(), {
+        u1, v1,
+        u2, v1,
+        u2, v2,
+        u1, v2,
+    });
+    mesh.indices.push_back(mesh.icount);
+    mesh.indices.push_back(mesh.icount + 1);
+    mesh.indices.push_back(mesh.icount + 2);
+    mesh.indices.push_back(mesh.icount + 2);
+    mesh.indices.push_back(mesh.icount + 3);
+    mesh.indices.push_back(mesh.icount);
+    mesh.icount += 4;
+}
+
+Text createText(const sf::Font &font, const std::string str, int size)
+{
+    Mesh mesh;
 
     for (auto i : str) {
         font.getGlyph(i, size, false);
     }
     auto &texture = font.getTexture(size);
     auto image = texture.copyToImage();
-    //image.flipVertically();
-    // image.flipHorizontally();
+   
+
+    Text text;
     text.fontTexture.create(image);
-
-
+    for (auto i : str) {
+        auto &glyph = font.getGlyph(i, size, false);
+        addCharacter(mesh, glyph, image.getSize());
+    }
 
     text.vao.bind();
-    text.vao.addVertexBuffer(2, vertices);
-    text.vao.addVertexBuffer(2, textureCoords);
-    text.vao.addIndexBuffer(indices);
-
-
+    text.vao.addVertexBuffer(2, mesh.vertices);
+    text.vao.addVertexBuffer(2, mesh.textureCoords);
+    text.vao.addIndexBuffer(mesh.indices);
 
     return text;
 }
@@ -40,15 +83,6 @@ Text createText(const sf::Font& font, const std::string str, int size)
 Application::Application(sf::Window &window)
     : m_window(window)
 {
-    sf::ContextSettings settings;
-    settings.depthBits = 24;
-    settings.stencilBits = 8;
-    settings.antialiasingLevel = 4;
-    settings.majorVersion = 3;
-    settings.minorVersion = 3;
-    m_window.setFramerateLimit(60);
-    m_window.setKeyRepeatEnabled(false);
-
     glViewport(0, 0, 1280, 720);
     glEnable(GL_DEPTH_TEST);
 
@@ -169,7 +203,18 @@ void Application::onRender()
     gl::loadUniform(m_quadShader.modelLocation, modelMatrix);
 
     // Render
-    m_text.fontTexture.bind();
+    m_texture.bind();
     m_quad.bind();
     m_quad.getDrawable().bindAndDraw();
+
+    //Render the text
+    {
+        glm::mat4 modelMatrix{1.0f};
+        translateMatrix(modelMatrix, {0, 0, 1});
+        gl::loadUniform(m_quadShader.modelLocation, modelMatrix);
+
+        m_text.fontTexture.bind();
+        m_text.vao.bind();
+        m_text.vao.getDrawable().bindAndDraw();
+    }
 }
