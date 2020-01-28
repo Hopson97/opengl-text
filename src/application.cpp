@@ -94,40 +94,59 @@ void addCharacter(Mesh &mesh, const sf::Glyph &glyph, char c,
     mesh.icount += 4;
 }
 
+/**
+ * @brief Create a Text object
+ * 
+ * @param font The font of the text
+ * @param str THe string to set the text to
+ * @param size The size of characters
+ * @return Text A texture and VAO for that text
+ */
 Text createText(const sf::Font &font, const std::string str, int size)
 {
     Mesh mesh;
 
-    float max = 0;
+    // Pre-render the glyphs of the font for the text
+    float maximumCharacterHeight = 0;
     for (auto i : str) {
         auto& g  = font.getGlyph(i, size, false);
-        max = std::max(max, g.bounds.height);
+        maximumCharacterHeight = 
+            std::max(maximumCharacterHeight, g.bounds.height);
     }
+    // Grab the image texture
     auto &texture = font.getTexture(size);
     auto image = texture.copyToImage();
-  //  image.flipVertically();
-   
 
+    // The VAO/ Texture
     Text text;
     text.fontTexture.create(image);
+
+    // The character position
     sf::Vector2f position;
+
+    // The previous character (For kerning offset)
     char prev = 0;
-    float height = 0;
-    for (auto i : str) {
-        position.x += font.getKerning(prev, i, size);
-        prev = i;
+
+    // Loop through all chars of the string
+    for (auto character : str) {
+        // Add some kerning offset
+        position.x += font.getKerning(prev, character, size);
+        prev = character;
         
-        if (i == '\n') {
-            position.y -= max;
+        // Handle a new line
+        if (character == '\n') {
+            position.y -= maximumCharacterHeight;
             position.x = 0;
             continue;
         }
-
-        auto &glyph = font.getGlyph(i, size, false);
-        addCharacter(mesh, glyph, i, image.getSize(), position, max);
+        
+        // Get the character glyph and add it to the mesh
+        auto &glyph = font.getGlyph(character, size, false);
+        addCharacter(mesh, glyph, character, image.getSize(), position, maximumCharacterHeight);
         position.x += glyph.advance;
     }
 
+    //Bind buffer etc
     text.vao.bind();
     text.vao.addVertexBuffer(2, mesh.vertices);
     text.vao.addVertexBuffer(2, mesh.textureCoords);
