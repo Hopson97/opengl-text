@@ -6,7 +6,11 @@ Testing to see if I can get opengl text rendering using sfml as a font loader.
 
 Text loaded to a texture:
 
-https://i.imgur.com/LdkzzWk.png
+![Text loaded to a texture:](https://i.imgur.com/LdkzzWk.png)
+
+[Commit](https://github.com/Hopson97/opengl-text/tree/1217595952a72f73bd78b04eda9d59735d56876c)
+
+___
 
 ## Building and Running
 
