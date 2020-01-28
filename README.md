@@ -1,4 +1,4 @@
-# gltexttest
+# OpenGL Text Testing
 
 Testing to see if I can get opengl text rendering using sfml as a font loader.
 
