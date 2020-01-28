@@ -1,5 +1,7 @@
 #include "application.h"
 
+#include "gl/gl_errors.h"
+
 #include <cmath>
 #include <iostream>
 
@@ -15,30 +17,47 @@ struct Mesh {
 
 //Adapted from https://github.com/SFML/SFML/blob/master/src/SFML/Graphics/Text.cpp
 // void addGlyphQuad
-void addCharacter(Mesh &mesh, const sf::Glyph &glyph,
-                  const sf::Vector2u &imageSize, const sf::Vector2f& position)
+void addCharacter(Mesh &mesh, const sf::Glyph &glyph, char c,
+                  const sf::Vector2u &imageSize, const sf::Vector2f& position, float maxHeight)
 {
+    const std::string HALF_DOWN = "yqjpgQ()[]{}@\\/";
+    const std::string FLIP_POS  = "\"'";
+
     float width = static_cast<float>(imageSize.x);
     float height = static_cast<float>(imageSize.y);
+    //float half = height / 2;
 
-    float pad = 1.0f;
+    float pad = 0.1f;
 
     float left = glyph.bounds.left - pad;
-    float top = glyph.bounds.top - pad;
+    float top = glyph.bounds.top - pad + (glyph.bounds.height - maxHeight);
     float right = glyph.bounds.left + glyph.bounds.width + pad;
-    float bottom = glyph.bounds.top + glyph.bounds.height + pad;
+    float bottom = glyph.bounds.top + glyph.bounds.height + pad + (glyph.bounds.height - maxHeight);
+
+
+    if (HALF_DOWN.find(c) != std::string::npos) {
+        top -= glyph.bounds.height / 2;
+        bottom -= glyph.bounds.height / 2;
+    }
+
+    if (FLIP_POS.find(c) != std::string::npos) {
+        top += maxHeight;
+        bottom += maxHeight;
+    }
 
     float texLeft = (static_cast<float>(glyph.textureRect.left) - pad) / width;
     float texRight = (static_cast<float>(glyph.textureRect.left + glyph.textureRect.width) + pad) / width;
 
     float texTop = (static_cast<float>(glyph.textureRect.top) - pad) / height;
     float texBottom  = (static_cast<float>(glyph.textureRect.top + glyph.textureRect.height) + pad) / height;
+    std::swap(texTop, texBottom);
 
+    float scale = 256;
     mesh.vertices.insert(mesh.vertices.end(), {
-        (position.x + left) / 64, (position.y + top) / 64,
-        (position.x + right) / 64, (position.y + top) / 64,
-        (position.x + right) / 64, (position.y + bottom) / 64,
-        (position.x + left) / 64, (position.y + bottom) / 64,
+        (position.x + left) / scale,  (position.y + top) / scale,
+        (position.x + right) / scale, (position.y + top) / scale,
+        (position.x + right) / scale, (position.y + bottom) / scale,
+        (position.x + left) / scale, (position.y + bottom) / scale,
     });
 
     mesh.textureCoords.insert(mesh.textureCoords.end(), {
@@ -60,19 +79,33 @@ Text createText(const sf::Font &font, const std::string str, int size)
 {
     Mesh mesh;
 
+    float max = 0;
     for (auto i : str) {
-        font.getGlyph(i, size, false);
+        auto& g  = font.getGlyph(i, size, false);
+        max = std::max(max, g.bounds.height);
     }
     auto &texture = font.getTexture(size);
     auto image = texture.copyToImage();
+  //  image.flipVertically();
    
 
     Text text;
     text.fontTexture.create(image);
     sf::Vector2f position;
+    char prev = 0;
+    float height = 0;
     for (auto i : str) {
+        position.x += font.getKerning(prev, i, size);
+        prev = i;
+        
+        if (i == '\n') {
+            position.y -= max;
+            position.x = 0;
+            continue;
+        }
+
         auto &glyph = font.getGlyph(i, size, false);
-        addCharacter(mesh, glyph, image.getSize(), position);
+        addCharacter(mesh, glyph, i, image.getSize(), position, max);
         position.x += glyph.advance;
     }
 
@@ -104,7 +137,7 @@ Application::Application(sf::Window &window)
 
     m_texture.create("logo");
 
-    std::string test = "Hello world!";
+    std::string test = "Did I ever tell you?\nThe \"story\"!?\n'The quick brown fox jumps over the lazy dog'!![]\n()\n{}\nTHE QUICK BROWN FOX JUMPED OVER THE LAZY DOG.\n-=_+@~#/\\";
     m_font.loadFromFile("res/ubuntu.ttf");
     m_text = createText(m_font, test, 32);
 }
@@ -206,8 +239,9 @@ void Application::onRender()
     gl::loadUniform(m_quadShader.projViewLocation, projectionViewMatrix);
     gl::loadUniform(m_quadShader.modelLocation, modelMatrix);
 
+    
     // Render
-    m_texture.bind();
+    //m_texture.bind();
     m_quad.bind();
     m_quad.getDrawable().bindAndDraw();
 

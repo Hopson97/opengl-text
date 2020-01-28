@@ -28,7 +28,7 @@ if(MSVC)
     	/W4 /WX)
 else()
   	target_compile_options(${PROJECT_NAME} PRIVATE 
-		-Wall -Wextra -Werror -pedantic)		#Warning flags
+		-Wall -Wextra -pedantic)		#Warning flags
 endif()
 
 #Set module path
