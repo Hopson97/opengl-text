@@ -36,6 +36,13 @@ Application::Application(sf::Window &window)
     m_texture.create("logo");
 
     m_font.loadFromFile("res/ubuntu.ttf");
+
+    std::string test = "Hello world!\n";
+
+    for (auto c : test) {
+        m_font.getGlyph(c, 10, false);
+    }
+
 }
 
 void Application::run()

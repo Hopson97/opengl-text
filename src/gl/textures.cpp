@@ -11,6 +11,12 @@ GLuint createTexture()
     return handle;
 }
 
+void texImage2d(GLenum param, const sf::Image& image)
+{
+    glCheck(glTexImage2D(param, 0, GL_RGBA, image.getSize().x, image.getSize().y, 0,
+                         GL_RGBA, GL_UNSIGNED_BYTE, image.getPixelsPtr()));
+}
+
 bool bufferImage(GLenum param, const std::string &file)
 {
     sf::Image img;
@@ -18,9 +24,7 @@ bool bufferImage(GLenum param, const std::string &file)
         std::cerr << "Could not load: " << file << '\n';
         return false;
     }
-
-    glCheck(glTexImage2D(param, 0, GL_RGBA, img.getSize().x, img.getSize().y, 0,
-                         GL_RGBA, GL_UNSIGNED_BYTE, img.getPixelsPtr()));
+    texImage2d(param, img);
     return true;
 }
 
@@ -98,6 +102,18 @@ Texture2d &Texture2d::operator=(Texture2d &&other)
     m_handle = other.m_handle;
     other.reset();
     return *this;
+}
+
+void Texture2d::create(const sf::Image& image)
+{
+    bind();
+    texImage2d(GL_TEXTURE_2D, image);
+    glCheck(glGenerateMipmap(GL_TEXTURE_2D));
+    glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+                            GL_LINEAR_MIPMAP_LINEAR));
+    glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+    glCheck(glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_LOD_BIAS, -0.4f));
+    m_hasTexture = true;
 }
 
 void Texture2d::create(const std::string &file)

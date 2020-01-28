@@ -53,4 +53,5 @@ class Application {
     Keyboard m_keyboard;
 
     sf::Font m_font;
+    gl::Texture2d m_fontTexture;
 };
