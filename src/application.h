@@ -21,6 +21,12 @@ constexpr float PI = 3.14159;
 constexpr float ACCELERATION = 0.4f;
 constexpr float ACCELERATION_DAMP = 0.85f;
 
+
+struct Text {
+    gl::VertexArray vao;
+    gl::Texture2d fontTexture;
+};
+
 class Application {
   public:
     Application(sf::Window &window);
@@ -53,7 +59,8 @@ class Application {
     Keyboard m_keyboard;
 
     sf::Font m_font;
-    gl::Texture2d m_fontTexture;
+
+    Text m_text;
 
     bool m_isMouseLocked = false;
 };

@@ -6,6 +6,37 @@
 #include "gl/primitive.h"
 #include "maths.h"
 
+
+Text createText(const sf::Font& font, const std::string str, int size)
+{
+    std::vector<GLfloat> vertices;
+    std::vector<GLfloat> textureCoords;
+    std::vector<GLuint> indices;
+
+
+    Text text;
+
+    for (auto i : str) {
+        font.getGlyph(i, size, false);
+    }
+    auto &texture = font.getTexture(size);
+    auto image = texture.copyToImage();
+    //image.flipVertically();
+    // image.flipHorizontally();
+    text.fontTexture.create(image);
+
+
+
+    text.vao.bind();
+    text.vao.addVertexBuffer(2, vertices);
+    text.vao.addVertexBuffer(2, textureCoords);
+    text.vao.addIndexBuffer(indices);
+
+
+
+    return text;
+}
+
 Application::Application(sf::Window &window)
     : m_window(window)
 {
@@ -35,18 +66,9 @@ Application::Application(sf::Window &window)
 
     m_texture.create("logo");
 
-    m_font.loadFromFile("res/ubuntu.ttf");
-
     std::string test = "Hello world!";
-
-    for (auto c : test) {
-        m_font.getGlyph(c, 64, false);
-    }
-    auto &tex = m_font.getTexture(64);
-    auto image = tex.copyToImage();
-    image.flipVertically();
-    // image.flipHorizontally();
-    m_fontTexture.create(image);
+    m_font.loadFromFile("res/ubuntu.ttf");
+    m_text = createText(m_font, test, 64);
 }
 
 void Application::run()
@@ -147,7 +169,7 @@ void Application::onRender()
     gl::loadUniform(m_quadShader.modelLocation, modelMatrix);
 
     // Render
-    m_fontTexture.bind();
+    m_text.fontTexture.bind();
     m_quad.bind();
     m_quad.getDrawable().bindAndDraw();
 }
