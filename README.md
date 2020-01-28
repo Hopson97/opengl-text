@@ -2,7 +2,7 @@
 
 Testing to see if I can get opengl text rendering using sfml as a font loader.
 
-## Progress
+## Progress [(Album)](https://imgur.com/a/HulQLra)
 
 Text loaded to a texture:
 
@@ -11,6 +11,12 @@ Text loaded to a texture:
 [Commit](https://github.com/Hopson97/opengl-text/tree/1217595952a72f73bd78b04eda9d59735d56876c)
 
 ___
+
+Text rendered as a single vertex array, one character per quad.
+
+![Text rendered to a quad](https://i.imgur.com/zY42eof.png)
+
+[Commit](https://github.com/Hopson97/opengl-text/tree/e1a90a02a6b6a542813535ff324d2886910b04af)
 
 ## Building and Running
 
