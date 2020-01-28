@@ -13,6 +13,8 @@ struct Mesh {
     GLuint icount = 0;
 };
 
+//Adapted from https://github.com/SFML/SFML/blob/master/src/SFML/Graphics/Text.cpp
+// void addGlyphQuad
 void addCharacter(Mesh &mesh, const sf::Glyph &glyph,
                   const sf::Vector2u &imageSize)
 {
@@ -26,11 +28,11 @@ void addCharacter(Mesh &mesh, const sf::Glyph &glyph,
     float right = glyph.bounds.left + glyph.bounds.width + pad;
     float bottom = glyph.bounds.top + glyph.bounds.height + pad;
 
-    float u1 = (static_cast<float>(glyph.textureRect.left) - pad) / width;
-    float u2 = (static_cast<float>(glyph.textureRect.left + glyph.textureRect.width) + pad) / width;
+    float texLeft = (static_cast<float>(glyph.textureRect.left) - pad) / width;
+    float texRight = (static_cast<float>(glyph.textureRect.left + glyph.textureRect.width) + pad) / width;
 
-    float v1 = (static_cast<float>(glyph.textureRect.top) - pad) / height;
-    float v2  = (static_cast<float>(glyph.textureRect.top + glyph.textureRect.height) + pad) / height;
+    float texTop = (static_cast<float>(glyph.textureRect.top) - pad) / height;
+    float texBottom  = (static_cast<float>(glyph.textureRect.top + glyph.textureRect.height) + pad) / height;
 
     mesh.vertices.insert(mesh.vertices.end(), {
         left, top,
@@ -40,10 +42,10 @@ void addCharacter(Mesh &mesh, const sf::Glyph &glyph,
     });
 
     mesh.textureCoords.insert(mesh.textureCoords.end(), {
-        u1, v1,
-        u2, v1,
-        u2, v2,
-        u1, v2,
+        texLeft, texTop,
+        texRight, texTop,
+        texRight, texBottom,
+        texLeft, texBottom,
     });
     mesh.indices.push_back(mesh.icount);
     mesh.indices.push_back(mesh.icount + 1);
