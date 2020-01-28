@@ -16,7 +16,7 @@ struct Mesh {
 //Adapted from https://github.com/SFML/SFML/blob/master/src/SFML/Graphics/Text.cpp
 // void addGlyphQuad
 void addCharacter(Mesh &mesh, const sf::Glyph &glyph,
-                  const sf::Vector2u &imageSize)
+                  const sf::Vector2u &imageSize, const sf::Vector2f& position)
 {
     float width = static_cast<float>(imageSize.x);
     float height = static_cast<float>(imageSize.y);
@@ -35,10 +35,10 @@ void addCharacter(Mesh &mesh, const sf::Glyph &glyph,
     float texBottom  = (static_cast<float>(glyph.textureRect.top + glyph.textureRect.height) + pad) / height;
 
     mesh.vertices.insert(mesh.vertices.end(), {
-        left, top,
-        right, top,
-        right, bottom,
-        left, bottom
+        (position.x + left) / 64, (position.y + top) / 64,
+        (position.x + right) / 64, (position.y + top) / 64,
+        (position.x + right) / 64, (position.y + bottom) / 64,
+        (position.x + left) / 64, (position.y + bottom) / 64,
     });
 
     mesh.textureCoords.insert(mesh.textureCoords.end(), {
@@ -69,9 +69,11 @@ Text createText(const sf::Font &font, const std::string str, int size)
 
     Text text;
     text.fontTexture.create(image);
+    sf::Vector2f position;
     for (auto i : str) {
         auto &glyph = font.getGlyph(i, size, false);
-        addCharacter(mesh, glyph, image.getSize());
+        addCharacter(mesh, glyph, image.getSize(), position);
+        position.x += glyph.advance;
     }
 
     text.vao.bind();
@@ -104,7 +106,7 @@ Application::Application(sf::Window &window)
 
     std::string test = "Hello world!";
     m_font.loadFromFile("res/ubuntu.ttf");
-    m_text = createText(m_font, test, 64);
+    m_text = createText(m_font, test, 32);
 }
 
 void Application::run()
