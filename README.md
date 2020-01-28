@@ -18,6 +18,14 @@ Text rendered as a single vertex array, one character per quad.
 
 [Commit](https://github.com/Hopson97/opengl-text/tree/e1a90a02a6b6a542813535ff324d2886910b04af)
 
+____
+
+Text as row of text, except the image texture seems to be upsidedown flipped.
+
+![Upside down text row](https://i.imgur.com/EHqVyYT.png)
+
+[Commit](https://github.com/Hopson97/opengl-text/commit/5813c3f56e0b1a9246035c2a2f367a5d224d7969)
+
 ## Building and Running
 
 ### Libraries
