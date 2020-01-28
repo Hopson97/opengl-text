@@ -20,21 +20,25 @@ struct Mesh {
 void addCharacter(Mesh &mesh, const sf::Glyph &glyph, char c,
                   const sf::Vector2u &imageSize, const sf::Vector2f& position, float maxHeight)
 {
+    // Edge case: Chars that go over a line
     const std::string HALF_DOWN = "yqjpgQ()[]{}@\\/";
+
+    // Edge case: Chars that appear at the top of text
     const std::string FLIP_POS  = "\"'*^";
 
+    // Short hand for width and height of image
     float width = static_cast<float>(imageSize.x);
     float height = static_cast<float>(imageSize.y);
-    //float half = height / 2;
 
     float pad = 0.1f;
 
+    //Find the vertex positions of the the quad that will render this character
     float left = glyph.bounds.left - pad;
     float top = glyph.bounds.top - pad + (glyph.bounds.height - maxHeight);
     float right = glyph.bounds.left + glyph.bounds.width + pad;
     float bottom = glyph.bounds.top + glyph.bounds.height + pad + (glyph.bounds.height - maxHeight);
 
-
+    //Handle edge cases
     if (HALF_DOWN.find(c) != std::string::npos) {
         top -= glyph.bounds.height / 2;
         bottom -= glyph.bounds.height / 2;
@@ -45,6 +49,7 @@ void addCharacter(Mesh &mesh, const sf::Glyph &glyph, char c,
         bottom += maxHeight;
     }
 
+    //Find the texture coords in the texture
     float texLeft = (static_cast<float>(glyph.textureRect.left) - pad) / width;
     float texRight = (static_cast<float>(glyph.textureRect.left + glyph.textureRect.width) + pad) / width;
 
@@ -122,6 +127,8 @@ Application::Application(sf::Window &window)
 {
     glViewport(0, 0, 1280, 720);
     glEnable(GL_DEPTH_TEST);
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
 
     m_quadShader.program.create("static", "static");
     m_quadShader.program.bind();
@@ -139,7 +146,7 @@ Application::Application(sf::Window &window)
 
     std::string test = "Did I ever tell you?\nThe \"story\"!?\n'The quick brown fox jumps over the lazy, bad dog'!![]\n()\n{}\nTHE QUICK BROWN FOX JUMPED OVER THE LAZY DOG.\n-=_+@~$£!/\\*<>,#";
     m_font.loadFromFile("res/ubuntu.ttf");
-    m_text = createText(m_font, test, 32);
+    m_text = createText(m_font, test, 128);
 }
 
 void Application::run()
