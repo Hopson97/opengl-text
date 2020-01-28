@@ -3,7 +3,6 @@
 #include <glad/glad.h>
 #include <iostream>
 
-
 void glCheckError(const char *file, unsigned int line, const char *expression)
 {
     // Get the last error

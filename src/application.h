@@ -6,8 +6,8 @@
 
 #include "gl/primitive.h"
 #include "gl/shader.h"
-#include "gl/vertex_array.h"
 #include "gl/textures.h"
+#include "gl/vertex_array.h"
 
 #include <SFML/Graphics/Font.hpp>
 

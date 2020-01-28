@@ -11,10 +11,11 @@ GLuint createTexture()
     return handle;
 }
 
-void texImage2d(GLenum param, const sf::Image& image)
+void texImage2d(GLenum param, const sf::Image &image)
 {
-    glCheck(glTexImage2D(param, 0, GL_RGBA, image.getSize().x, image.getSize().y, 0,
-                         GL_RGBA, GL_UNSIGNED_BYTE, image.getPixelsPtr()));
+    glCheck(glTexImage2D(param, 0, GL_RGBA, image.getSize().x,
+                         image.getSize().y, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+                         image.getPixelsPtr()));
 }
 
 bool bufferImage(GLenum param, const std::string &file)
@@ -104,10 +105,12 @@ Texture2d &Texture2d::operator=(Texture2d &&other)
     return *this;
 }
 
-void Texture2d::create(const sf::Image& image)
+void Texture2d::create(const sf::Image &image)
 {
     bind();
+
     texImage2d(GL_TEXTURE_2D, image);
+
     glCheck(glGenerateMipmap(GL_TEXTURE_2D));
     glCheck(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
                             GL_LINEAR_MIPMAP_LINEAR));

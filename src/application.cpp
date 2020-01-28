@@ -30,7 +30,7 @@ Application::Application(sf::Window &window)
 
     m_quad = makeQuadVertexArray(1.0f, 1.0f);
 
-    m_projectionMatrix = 
+    m_projectionMatrix =
         glm::perspective(3.14f / 2.0f, 1280.0f / 720.0f, 0.01f, 100.0f);
 
     m_texture.create("logo");
@@ -42,7 +42,6 @@ Application::Application(sf::Window &window)
     for (auto c : test) {
         m_font.getGlyph(c, 10, false);
     }
-
 }
 
 void Application::run()
@@ -125,9 +124,10 @@ void Application::onUpdate()
 
 void Application::onRender()
 {
-    glm::mat4 projectionViewMatrix = createProjectionViewMatrix(player.pos, player.rot, m_projectionMatrix);
+    glm::mat4 projectionViewMatrix =
+        createProjectionViewMatrix(player.pos, player.rot, m_projectionMatrix);
 
-    //Render the quad
+    // Render the quad
     m_quadShader.program.bind();
     glm::mat4 modelMatrix{1.0f};
     rotateMatrix(modelMatrix, {45.0f, 0.0f, 0.0f});
