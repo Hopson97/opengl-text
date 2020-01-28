@@ -41,7 +41,7 @@ So added a bunch of hacky edge cases :/
 
 Kinda works but idk prob is a better way:
 
-[Final](https://cdn.discordapp.com/attachments/113418926909644800/671844350854168596/unknown.png)
+![Final](https://cdn.discordapp.com/attachments/113418926909644800/671844350854168596/unknown.png)
 
 
 
