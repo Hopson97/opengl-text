@@ -158,7 +158,7 @@ Application::Application(sf::Window &window)
     m_orthoMatrix = glm::ortho(0.0f, 1600.0f, 0.0f, 900.0f, -1.0f, 1.0f);
     m_texture.create("logo");
 
-    std::string test = "Single Player\n\nMultiplayer\n\nSettings\n\nExit Game";
+    std::string test = "abcdefghijklmnopqrstuvwxyz\nABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\n.,!?-+/():;%&`*#=[]\" ";
     m_font.loadFromFile("res/Montserrat-Bold.ttf");
 
     m_text = createText(m_font, test, 500);
@@ -279,7 +279,7 @@ void Application::onRender()
         translateMatrix(modelMatrix, {10, 900, 0});
         rotateMatrix(modelMatrix, {180.0f, 0.0f, 0.f});
 
-        float scale = 1000.0f / 500.0f;
+        float scale = 32.0f / 500.0f;
 
         scaleMatrix(modelMatrix, scale);
         gl::loadUniform(m_quadShader.modelLocation, modelMatrix);
