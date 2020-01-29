@@ -51,6 +51,7 @@ class Application {
     } player;
 
     glm::mat4 m_projectionMatrix{1.0f};
+    glm::mat4 m_orthoMatrix{1.0f};
 
     gl::VertexArray m_quad;
     gl::Texture2d m_texture;

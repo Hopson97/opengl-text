@@ -155,7 +155,7 @@ Application::Application(sf::Window &window)
     m_projectionMatrix =
         glm::perspective(3.14f / 2.0f, 1600.0f / 900.0f, 0.01f, 100.0f);
         
-    m_projectionMatrix = glm::ortho(0.0f, 1600.0f, 0.0f, 900.0f, -1.0f, 1.0f);
+    m_orthoMatrix = glm::ortho(0.0f, 1600.0f, 0.0f, 900.0f, -1.0f, 1.0f);
     m_texture.create("logo");
 
     std::string test = "Single Player\n\nMultiplayer\n\nSettings\n\nExit Game";
@@ -259,12 +259,12 @@ void Application::onRender()
     rotateMatrix(modelMatrix, {0.0f, 0.0f, 0.f});
     scaleMatrix(modelMatrix, {2.0f});
 
-    gl::loadUniform(m_quadShader.projViewLocation, m_projectionMatrix);
+    gl::loadUniform(m_quadShader.projViewLocation, projectionViewMatrix);
     gl::loadUniform(m_quadShader.modelLocation, modelMatrix);
 
     
     // Render
-    //m_texture.bind();
+   // m_texture.bind();
     m_quad.bind();
     m_quad.getDrawable().bindAndDraw();
 
@@ -280,6 +280,7 @@ void Application::onRender()
         rotateMatrix(modelMatrix, {180.0f, 0.0f, 0.f});
         scaleMatrix(modelMatrix, 1.f);
         gl::loadUniform(m_quadShader.modelLocation, modelMatrix);
+        gl::loadUniform(m_quadShader.projViewLocation, m_orthoMatrix);
         d.draw();
     }
 }
