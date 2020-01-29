@@ -49,7 +49,7 @@ void addCharacter(Mesh &mesh, const sf::Glyph &glyph, char c,
     float texBottom  = (static_cast<float>(glyph.textureRect.top + glyph.textureRect.height) + pad) / height;
 
     // Add the vertex positions to the mesh
-    float scale = 256;
+    float scale = 1;
     mesh.vertices.insert(mesh.vertices.end(), {
          (position.x + left) / scale,  (position.y + top) / scale,
         (position.x + right) / scale, (position.y + top) / scale,
@@ -104,7 +104,7 @@ Text createText(const sf::Font &font, const std::string str, int size)
     text.fontTexture.create(image);
 
     // The character position
-    sf::Vector2f position;
+    sf::Vector2f position{0, size};
 
     // The previous character (For kerning offset)
     char prev = 0;
@@ -113,6 +113,7 @@ Text createText(const sf::Font &font, const std::string str, int size)
     for (auto character : str) {
         // Add some kerning offset
         position.x += font.getKerning(prev, character, size);
+        std::cout << position.x << std::endl;
         prev = character;
         
         // Handle a new line
@@ -157,14 +158,14 @@ Application::Application(sf::Window &window)
     m_projectionMatrix =
         glm::perspective(3.14f / 2.0f, 1280.0f / 720.0f, 0.01f, 100.0f);
         
-
+    m_projectionMatrix = glm::ortho(0.0f, 1280.0f, 0.0f, 720.0f, -1.0f, 1.0f);
     m_texture.create("logo");
 
     //std::string test = "Did I ever tell you?\nThe \"story\"!?\n'The quick brown fox jumps over the lazy, bad dog'!![]\n()\n{}\nTHE QUICK BROWN FOX JUMPED OVER THE LAZY DOG.\n-=_+@~$£!/\\*<>,#";
     //std::string test = "\"Hello jumping giraffes!\"";
     std::string test = "\"oAyy-ooo_!\"Q";
     m_font.loadFromFile("res/ubuntu.ttf");
-    m_text = createText(m_font, test, 128);
+    m_text = createText(m_font, test, 32);
 }
 
 void Application::run()
@@ -262,7 +263,7 @@ void Application::onRender()
     rotateMatrix(modelMatrix, {0.0f, 0.0f, 0.f});
     scaleMatrix(modelMatrix, {2.0f});
 
-    gl::loadUniform(m_quadShader.projViewLocation, projectionViewMatrix);
+    gl::loadUniform(m_quadShader.projViewLocation, m_projectionMatrix);
     gl::loadUniform(m_quadShader.modelLocation, modelMatrix);
 
     
@@ -277,7 +278,7 @@ void Application::onRender()
     d.bind();
     {
         glm::mat4 modelMatrix{1.0f};
-        translateMatrix(modelMatrix, {0, 0, 1});
+        translateMatrix(modelMatrix, {10, 720, 0});
         rotateMatrix(modelMatrix, {180.0f, 0.0f, 0.f});
         gl::loadUniform(m_quadShader.modelLocation, modelMatrix);
         d.draw();
