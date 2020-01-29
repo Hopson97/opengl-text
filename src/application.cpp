@@ -159,9 +159,9 @@ Application::Application(sf::Window &window)
     m_texture.create("logo");
 
     std::string test = "Single Player\n\nMultiplayer\n\nSettings\n\nExit Game";
-    m_font.loadFromFile("res/ubuntu.ttf");
+    m_font.loadFromFile("res/Montserrat-Bold.ttf");
 
-    m_text = createText(m_font, test, 64);
+    m_text = createText(m_font, test, 500);
 }
 
 void Application::run()
@@ -278,7 +278,10 @@ void Application::onRender()
         glm::mat4 modelMatrix{1.0f};
         translateMatrix(modelMatrix, {10, 900, 0});
         rotateMatrix(modelMatrix, {180.0f, 0.0f, 0.f});
-        scaleMatrix(modelMatrix, 1.f);
+
+        float scale = 1000.0f / 500.0f;
+
+        scaleMatrix(modelMatrix, scale);
         gl::loadUniform(m_quadShader.modelLocation, modelMatrix);
         gl::loadUniform(m_quadShader.projViewLocation, m_orthoMatrix);
         d.draw();
