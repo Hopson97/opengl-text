@@ -14,6 +14,7 @@ set(SOURCES
     src/gl/vertex_array.cpp
     src/gl/gl_errors.cpp
     src/maths.cpp
+    src/text.cpp
 )
 
 add_executable(${PROJECT_NAME} ${SOURCES})

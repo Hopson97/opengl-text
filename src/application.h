@@ -12,6 +12,7 @@
 #include <SFML/Graphics/Font.hpp>
 
 #include "input/keyboard.h"
+#include "text.h"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
@@ -20,11 +21,6 @@
 constexpr float PI = 3.14159;
 constexpr float ACCELERATION = 0.4f;
 constexpr float ACCELERATION_DAMP = 0.85f;
-
-struct Text {
-    gl::VertexArray vao;
-    gl::Texture2d fontTexture;
-};
 
 class Application {
   public:
@@ -58,8 +54,7 @@ class Application {
 
     Keyboard m_keyboard;
 
-    sf::Font m_font;
-
+    Font m_font;
     Text m_text;
 
     bool m_isMouseLocked = false;

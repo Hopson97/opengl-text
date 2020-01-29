@@ -46,6 +46,8 @@
         "deque": "cpp",
         "optional": "cpp",
         "system_error": "cpp",
-        "chrono": "cpp"
+        "chrono": "cpp",
+        "*.ipp": "cpp",
+        "bitset": "cpp"
     }
 }

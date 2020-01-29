@@ -8,133 +8,6 @@
 #include "gl/primitive.h"
 #include "maths.h"
 
-struct Mesh {
-    std::vector<GLfloat> vertices;
-    std::vector<GLfloat> textureCoords;
-    std::vector<GLuint> indices;
-    GLuint icount = 0;
-};
-
-//Adapted from https://github.com/SFML/SFML/blob/master/src/SFML/Graphics/Text.cpp
-// void addGlyphQuad and ensureGeometryUpdate
-
-/**
- * @brief Creates a quad that contains a character, and adds to a mesh
- * 
- * @param mesh The mesh to add the character to
- * @param glyph The glyph being added
- * @param c The character being added
- * @param imageSize The size of the texture atlas
- * @param position The world position to put this char at
- * @param maxHeight The maximum height of the chars
- */
-void addCharacter(Mesh &mesh, const sf::Glyph &glyph, char c,
-                  const sf::Vector2u &imageSize, const sf::Vector2f& position)
-{
-    // Short hand for width and height of image
-    float width = static_cast<float>(imageSize.x);
-    float height = static_cast<float>(imageSize.y);
-
-    //Find the vertex positions of the the quad that will render this character
-    float left = glyph.bounds.left;
-    float top = glyph.bounds.top;
-    float right = glyph.bounds.left + glyph.bounds.width;
-    float bottom = glyph.bounds.top + glyph.bounds.height;
-
-    // Find the texture coords in the texture
-    float pad = 1.0f;
-    float texLeft = (static_cast<float>(glyph.textureRect.left) - pad) / width;
-    float texRight = (static_cast<float>(glyph.textureRect.left + glyph.textureRect.width) + pad) / width;
-    float texTop = (static_cast<float>(glyph.textureRect.top) - pad) / height;
-    float texBottom  = (static_cast<float>(glyph.textureRect.top + glyph.textureRect.height) + pad) / height;
-
-    // Add the vertex positions to the mesh
-    float scale = 1;
-    mesh.vertices.insert(mesh.vertices.end(), {
-         (position.x + left) / scale,  (position.y + top) / scale,
-        (position.x + right) / scale, (position.y + top) / scale,
-        (position.x + right) / scale, (position.y + bottom) / scale,
-        (position.x + left) / scale, (position.y + bottom) / scale,
-
-    });
-
-    // Add the textrue coords to the mesh
-    mesh.textureCoords.insert(mesh.textureCoords.end(), {
-        texLeft, texTop,
-        texRight, texTop,
-        texRight, texBottom,
-        texLeft, texBottom,
-    });
-
-    // Add indices to the mesh
-    mesh.indices.push_back(mesh.icount);
-    mesh.indices.push_back(mesh.icount + 1);
-    mesh.indices.push_back(mesh.icount + 2);
-    mesh.indices.push_back(mesh.icount + 2);
-    mesh.indices.push_back(mesh.icount + 3);
-    mesh.indices.push_back(mesh.icount);
-    mesh.icount += 4;
-}
-
-/**
- * @brief Create a Text object
- * 
- * @param font The font of the text
- * @param str THe string to set the text to
- * @param size The size of characters
- * @return Text A texture and VAO for that text
- */
-Text createText(const sf::Font &font, const std::string str, int size)
-{
-    Mesh mesh;
-
-    // Pre-render the glyphs of the font for the text
-    for (auto i : str) {
-        font.getGlyph(i, size, false);
-    }
-    // Grab the image texture
-    auto &texture = font.getTexture(size);
-    auto image = texture.copyToImage();
-
-    // The VAO/ Texture
-    Text text;
-    text.fontTexture.create(image);
-
-    // The character position
-    sf::Vector2f position{0, size};
-
-    // The previous character (For kerning offset)
-    char prev = 0;
-
-    // Loop through all chars of the string
-    for (auto character : str) {
-        // Add some kerning offset
-        position.x += font.getKerning(prev, character, size);
-        std::cout << position.x << std::endl;
-        prev = character;
-        
-        // Handle a new line
-        if (character == '\n') {
-            position.y += font.getLineSpacing(size);
-            position.x = 0;
-            continue;
-        }
-        
-        // Get the character glyph and add it to the mesh
-        auto &glyph = font.getGlyph(character, size, false);
-        addCharacter(mesh, glyph, character, image.getSize(), position);
-        position.x += glyph.advance;
-    }
-
-    //Bind buffer etc
-    text.vao.bind();
-    text.vao.addVertexBuffer(2, mesh.vertices);
-    text.vao.addVertexBuffer(2, mesh.textureCoords);
-    text.vao.addIndexBuffer(mesh.indices);
-
-    return text;
-}
-
 Application::Application(sf::Window &window)
     : m_window(window)
 {
@@ -158,10 +31,12 @@ Application::Application(sf::Window &window)
     m_orthoMatrix = glm::ortho(0.0f, 1600.0f, 0.0f, 900.0f, -1.0f, 1.0f);
     m_texture.create("logo");
 
-    std::string test = "abcdefghijklmnopqrstuvwxyz\nABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789\n.,!?-+/():;%&`*#=[]\" ";
-    m_font.loadFromFile("res/Montserrat-Bold.ttf");
 
-    m_text = createText(m_font, test, 500);
+    m_text.setPosition({200, 500, 0});
+    m_font.init("res/Montserrat-Bold.ttf", 256);
+    m_text.setCharSize(32.f);
+    m_text.setFont(m_font);
+    m_text.setText("Hello world\n");
 }
 
 void Application::run()
@@ -252,6 +127,10 @@ void Application::onRender()
 {
     glm::mat4 projectionViewMatrix =
         createProjectionViewMatrix(player.pos, player.rot, m_projectionMatrix);
+    
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  
+
 
     // Render the quad
     m_quadShader.program.bind();
@@ -262,28 +141,11 @@ void Application::onRender()
     gl::loadUniform(m_quadShader.projViewLocation, projectionViewMatrix);
     gl::loadUniform(m_quadShader.modelLocation, modelMatrix);
 
-    
-    // Render
-   // m_texture.bind();
+    m_texture.bind();
     m_quad.bind();
     m_quad.getDrawable().bindAndDraw();
 
-    //Render the text
-    m_text.fontTexture.bind();
-    auto d = m_text.vao.getDrawable();
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  
-    d.bind();
-    {
-        glm::mat4 modelMatrix{1.0f};
-        translateMatrix(modelMatrix, {10, 900, 0});
-        rotateMatrix(modelMatrix, {180.0f, 0.0f, 0.f});
-
-        float scale = 32.0f / 500.0f;
-
-        scaleMatrix(modelMatrix, scale);
-        gl::loadUniform(m_quadShader.modelLocation, modelMatrix);
-        gl::loadUniform(m_quadShader.projViewLocation, m_orthoMatrix);
-        d.draw();
-    }
+    //Render text
+    gl::loadUniform(m_quadShader.projViewLocation, m_orthoMatrix);
+    m_text.render(m_quadShader.modelLocation);
 }

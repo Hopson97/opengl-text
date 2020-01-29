@@ -52,6 +52,7 @@ void glCheckError(const char *file, unsigned int line, const char *expression)
                   << description << "\n"
                   << std::endl;
         glCheckError(file, line, expression);
-        exit(-1);
+       // exit(-1);
+       throw std::runtime_error("");
     }
 }
