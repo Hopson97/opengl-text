@@ -29,8 +29,9 @@ struct Mesh {
  * @param maxHeight The maximum height of the chars
  */
 void addCharacter(Mesh &mesh, const sf::Glyph &glyph, char c,
-                  const sf::Vector2u &imageSize, const sf::Vector2f& position, float maxHeight)
+                  const sf::Vector2u &imageSize, const sf::Vector2f& position, float maxHeight, float lh)
 {
+    maxHeight = 0;
     // Edge case: Chars that go over a line
     const std::string HALF_DOWN = "yqjpgQ()[]{}@\\/";
 
@@ -40,15 +41,19 @@ void addCharacter(Mesh &mesh, const sf::Glyph &glyph, char c,
     // Short hand for width and height of image
     float width = static_cast<float>(imageSize.x);
     float height = static_cast<float>(imageSize.y);
+    float half = height / 2.0f;
+    float halfw = width / 2.0f;
 
     float pad = 0.1f;
 
     //Find the vertex positions of the the quad that will render this character
     float left = glyph.bounds.left - pad;
-    float top = glyph.bounds.top - pad + (glyph.bounds.height - maxHeight);
+    float top = glyph.bounds.top - pad;//+ (glyph.bounds.height - maxHeight);
     float right = glyph.bounds.left + glyph.bounds.width + pad;
-    float bottom = glyph.bounds.top + glyph.bounds.height + pad + (glyph.bounds.height - maxHeight);
+    float bottom = glyph.bounds.top + glyph.bounds.height + pad;// + (glyph.bounds.height - maxHeight);
 
+    std::cout << c << " " <<  glyph.bounds.left  << " " << glyph.bounds.top << " " << glyph.bounds.width << " " << glyph.bounds.height << std::endl;
+/*
     //Handle edge cases
     if (HALF_DOWN.find(c) != std::string::npos) {
         top -= glyph.bounds.height / 2;
@@ -59,21 +64,35 @@ void addCharacter(Mesh &mesh, const sf::Glyph &glyph, char c,
         top += maxHeight;
         bottom += maxHeight;
     }
-
+*/
     // Find the texture coords in the texture
     float texLeft = (static_cast<float>(glyph.textureRect.left) - pad) / width;
     float texRight = (static_cast<float>(glyph.textureRect.left + glyph.textureRect.width) + pad) / width;
     float texTop = (static_cast<float>(glyph.textureRect.top) - pad) / height;
     float texBottom  = (static_cast<float>(glyph.textureRect.top + glyph.textureRect.height) + pad) / height;
-    std::swap(texTop, texBottom);
+    //std::swap(texTop, texBottom);
 
+  //  std::swap(texTop, texBottom);
+
+/*
+    float dyb = texBottom - half;
+    texBottom = (half - dyb) / height;
+    float dyt = texTop - half;
+    texTop = (half - dyt) / height;
+
+    float dyr = texRight - half;
+    texRight = (halfw - dyr) / width;
+    float dyl = texLeft - half;
+    texLeft = (halfw - dyl) / width;
+*/
     // Add the vertex positions to the mesh
     float scale = 256;
     mesh.vertices.insert(mesh.vertices.end(), {
-        (position.x + left) / scale,  (position.y + top) / scale,
+         (position.x + left) / scale,  (position.y + top) / scale,
         (position.x + right) / scale, (position.y + top) / scale,
         (position.x + right) / scale, (position.y + bottom) / scale,
         (position.x + left) / scale, (position.y + bottom) / scale,
+
     });
 
     // Add the textrue coords to the mesh
@@ -116,6 +135,8 @@ Text createText(const sf::Font &font, const std::string str, int size)
     // Grab the image texture
     auto &texture = font.getTexture(size);
     auto image = texture.copyToImage();
+    //image.flipVertically();
+    //image.flipHorizontally();
 
     // The VAO/ Texture
     Text text;
@@ -135,14 +156,14 @@ Text createText(const sf::Font &font, const std::string str, int size)
         
         // Handle a new line
         if (character == '\n') {
-            position.y -= maximumCharacterHeight;
+            position.y -= font.getLineSpacing(size);
             position.x = 0;
             continue;
         }
         
         // Get the character glyph and add it to the mesh
         auto &glyph = font.getGlyph(character, size, false);
-        addCharacter(mesh, glyph, character, image.getSize(), position, maximumCharacterHeight);
+        addCharacter(mesh, glyph, character, image.getSize(), position, maximumCharacterHeight, font.getLineSpacing(size));
         position.x += glyph.advance;
     }
 
@@ -160,8 +181,8 @@ Application::Application(sf::Window &window)
 {
     glViewport(0, 0, 1280, 720);
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_CULL_FACE);
-    glCullFace(GL_BACK);
+   // glEnable(GL_CULL_FACE);
+    //glCullFace(GL_BACK);
 
     m_quadShader.program.create("static", "static");
     m_quadShader.program.bind();
@@ -174,10 +195,13 @@ Application::Application(sf::Window &window)
 
     m_projectionMatrix =
         glm::perspective(3.14f / 2.0f, 1280.0f / 720.0f, 0.01f, 100.0f);
+        
 
     m_texture.create("logo");
 
-    std::string test = "Did I ever tell you?\nThe \"story\"!?\n'The quick brown fox jumps over the lazy, bad dog'!![]\n()\n{}\nTHE QUICK BROWN FOX JUMPED OVER THE LAZY DOG.\n-=_+@~$£!/\\*<>,#";
+    //std::string test = "Did I ever tell you?\nThe \"story\"!?\n'The quick brown fox jumps over the lazy, bad dog'!![]\n()\n{}\nTHE QUICK BROWN FOX JUMPED OVER THE LAZY DOG.\n-=_+@~$£!/\\*<>,#";
+    //std::string test = "\"Hello jumping giraffes!\"";
+    std::string test = "\"oAyy-ooo_!\"Q";
     m_font.loadFromFile("res/ubuntu.ttf");
     m_text = createText(m_font, test, 128);
 }
@@ -274,7 +298,8 @@ void Application::onRender()
     // Render the quad
     m_quadShader.program.bind();
     glm::mat4 modelMatrix{1.0f};
-    rotateMatrix(modelMatrix, {45.0f, 0.0f, 0.0f});
+    rotateMatrix(modelMatrix, {0.0f, 0.0f, 0.f});
+    scaleMatrix(modelMatrix, {2.0f});
 
     gl::loadUniform(m_quadShader.projViewLocation, projectionViewMatrix);
     gl::loadUniform(m_quadShader.modelLocation, modelMatrix);
@@ -286,13 +311,22 @@ void Application::onRender()
     m_quad.getDrawable().bindAndDraw();
 
     //Render the text
+    m_text.fontTexture.bind();
+    auto d = m_text.vao.getDrawable();
+    d.bind();
     {
         glm::mat4 modelMatrix{1.0f};
         translateMatrix(modelMatrix, {0, 0, 1});
+        rotateMatrix(modelMatrix, {180.0f, 0.0f, 0.f});
         gl::loadUniform(m_quadShader.modelLocation, modelMatrix);
+        d.draw();
+    }
 
-        m_text.fontTexture.bind();
-        m_text.vao.bind();
-        m_text.vao.getDrawable().bindAndDraw();
+    {
+        glm::mat4 modelMatrix{1.0f};
+        translateMatrix(modelMatrix, {0, 0, 1});
+        //rotateMatrix(modelMatrix, {180.0f, 0.0f, 0.f});
+        gl::loadUniform(m_quadShader.modelLocation, modelMatrix);
+        d.draw();
     }
 }
