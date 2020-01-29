@@ -8,6 +8,6 @@ void main() {
     outColour = texture(tex, passTexCoord);
 
     if (outColour.a < 0.1) {
-        discard;
+        //discard;
     }
 }

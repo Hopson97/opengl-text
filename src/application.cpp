@@ -29,62 +29,25 @@ struct Mesh {
  * @param maxHeight The maximum height of the chars
  */
 void addCharacter(Mesh &mesh, const sf::Glyph &glyph, char c,
-                  const sf::Vector2u &imageSize, const sf::Vector2f& position, float maxHeight, float lh)
+                  const sf::Vector2u &imageSize, const sf::Vector2f& position)
 {
-    maxHeight = 0;
-    // Edge case: Chars that go over a line
-    const std::string HALF_DOWN = "yqjpgQ()[]{}@\\/";
-
-    // Edge case: Chars that appear at the top of text
-    const std::string FLIP_POS  = "\"'*^";
-
     // Short hand for width and height of image
     float width = static_cast<float>(imageSize.x);
     float height = static_cast<float>(imageSize.y);
-    float half = height / 2.0f;
-    float halfw = width / 2.0f;
-
-    float pad = 0.1f;
 
     //Find the vertex positions of the the quad that will render this character
-    float left = glyph.bounds.left - pad;
-    float top = glyph.bounds.top - pad;//+ (glyph.bounds.height - maxHeight);
-    float right = glyph.bounds.left + glyph.bounds.width + pad;
-    float bottom = glyph.bounds.top + glyph.bounds.height + pad;// + (glyph.bounds.height - maxHeight);
+    float left = glyph.bounds.left;
+    float top = glyph.bounds.top;
+    float right = glyph.bounds.left + glyph.bounds.width;
+    float bottom = glyph.bounds.top + glyph.bounds.height;
 
-    std::cout << c << " " <<  glyph.bounds.left  << " " << glyph.bounds.top << " " << glyph.bounds.width << " " << glyph.bounds.height << std::endl;
-/*
-    //Handle edge cases
-    if (HALF_DOWN.find(c) != std::string::npos) {
-        top -= glyph.bounds.height / 2;
-        bottom -= glyph.bounds.height / 2;
-    }
-
-    if (FLIP_POS.find(c) != std::string::npos) {
-        top += maxHeight;
-        bottom += maxHeight;
-    }
-*/
     // Find the texture coords in the texture
+    float pad = 1.0f;
     float texLeft = (static_cast<float>(glyph.textureRect.left) - pad) / width;
     float texRight = (static_cast<float>(glyph.textureRect.left + glyph.textureRect.width) + pad) / width;
     float texTop = (static_cast<float>(glyph.textureRect.top) - pad) / height;
     float texBottom  = (static_cast<float>(glyph.textureRect.top + glyph.textureRect.height) + pad) / height;
-    //std::swap(texTop, texBottom);
 
-  //  std::swap(texTop, texBottom);
-
-/*
-    float dyb = texBottom - half;
-    texBottom = (half - dyb) / height;
-    float dyt = texTop - half;
-    texTop = (half - dyt) / height;
-
-    float dyr = texRight - half;
-    texRight = (halfw - dyr) / width;
-    float dyl = texLeft - half;
-    texLeft = (halfw - dyl) / width;
-*/
     // Add the vertex positions to the mesh
     float scale = 256;
     mesh.vertices.insert(mesh.vertices.end(), {
@@ -135,8 +98,6 @@ Text createText(const sf::Font &font, const std::string str, int size)
     // Grab the image texture
     auto &texture = font.getTexture(size);
     auto image = texture.copyToImage();
-    //image.flipVertically();
-    //image.flipHorizontally();
 
     // The VAO/ Texture
     Text text;
@@ -163,7 +124,7 @@ Text createText(const sf::Font &font, const std::string str, int size)
         
         // Get the character glyph and add it to the mesh
         auto &glyph = font.getGlyph(character, size, false);
-        addCharacter(mesh, glyph, character, image.getSize(), position, maximumCharacterHeight, font.getLineSpacing(size));
+        addCharacter(mesh, glyph, character, image.getSize(), position);
         position.x += glyph.advance;
     }
 
@@ -318,14 +279,6 @@ void Application::onRender()
         glm::mat4 modelMatrix{1.0f};
         translateMatrix(modelMatrix, {0, 0, 1});
         rotateMatrix(modelMatrix, {180.0f, 0.0f, 0.f});
-        gl::loadUniform(m_quadShader.modelLocation, modelMatrix);
-        d.draw();
-    }
-
-    {
-        glm::mat4 modelMatrix{1.0f};
-        translateMatrix(modelMatrix, {0, 0, 1});
-        //rotateMatrix(modelMatrix, {180.0f, 0.0f, 0.f});
         gl::loadUniform(m_quadShader.modelLocation, modelMatrix);
         d.draw();
     }
