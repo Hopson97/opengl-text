@@ -35,7 +35,7 @@ int main()
     settings.antialiasingLevel = 4;
     settings.majorVersion = 3;
     settings.minorVersion = 3;
-    sf::Window window({1280, 720}, "OpenGL", sf::Style::Default, settings);
+    sf::Window window({1600, 900}, "OpenGL", sf::Style::Default, settings);
     window.setFramerateLimit(60);
     window.setKeyRepeatEnabled(false);
 

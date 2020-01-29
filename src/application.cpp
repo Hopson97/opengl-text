@@ -89,11 +89,8 @@ Text createText(const sf::Font &font, const std::string str, int size)
     Mesh mesh;
 
     // Pre-render the glyphs of the font for the text
-    float maximumCharacterHeight = 0;
     for (auto i : str) {
-        auto& g  = font.getGlyph(i, size, false);
-        maximumCharacterHeight = 
-            std::max(maximumCharacterHeight, g.bounds.height);
+        font.getGlyph(i, size, false);
     }
     // Grab the image texture
     auto &texture = font.getTexture(size);
@@ -118,7 +115,7 @@ Text createText(const sf::Font &font, const std::string str, int size)
         
         // Handle a new line
         if (character == '\n') {
-            position.y -= font.getLineSpacing(size);
+            position.y += font.getLineSpacing(size);
             position.x = 0;
             continue;
         }
@@ -141,7 +138,7 @@ Text createText(const sf::Font &font, const std::string str, int size)
 Application::Application(sf::Window &window)
     : m_window(window)
 {
-    glViewport(0, 0, 1280, 720);
+    glViewport(0, 0, 1600, 900);
     glEnable(GL_DEPTH_TEST);
    // glEnable(GL_CULL_FACE);
     //glCullFace(GL_BACK);
@@ -156,16 +153,15 @@ Application::Application(sf::Window &window)
     m_quad = makeQuadVertexArray(1.0f, 1.0f);
 
     m_projectionMatrix =
-        glm::perspective(3.14f / 2.0f, 1280.0f / 720.0f, 0.01f, 100.0f);
+        glm::perspective(3.14f / 2.0f, 1600.0f / 900.0f, 0.01f, 100.0f);
         
-    m_projectionMatrix = glm::ortho(0.0f, 1280.0f, 0.0f, 720.0f, -1.0f, 1.0f);
+    m_projectionMatrix = glm::ortho(0.0f, 1600.0f, 0.0f, 900.0f, -1.0f, 1.0f);
     m_texture.create("logo");
 
-    //std::string test = "Did I ever tell you?\nThe \"story\"!?\n'The quick brown fox jumps over the lazy, bad dog'!![]\n()\n{}\nTHE QUICK BROWN FOX JUMPED OVER THE LAZY DOG.\n-=_+@~$£!/\\*<>,#";
-    //std::string test = "\"Hello jumping giraffes!\"";
-    std::string test = "\"oAyy-ooo_!\"Q";
+    std::string test = "Single Player\n\nMultiplayer\n\nSettings\n\nExit Game";
     m_font.loadFromFile("res/ubuntu.ttf");
-    m_text = createText(m_font, test, 32);
+
+    m_text = createText(m_font, test, 64);
 }
 
 void Application::run()
@@ -275,11 +271,14 @@ void Application::onRender()
     //Render the text
     m_text.fontTexture.bind();
     auto d = m_text.vao.getDrawable();
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);  
     d.bind();
     {
         glm::mat4 modelMatrix{1.0f};
-        translateMatrix(modelMatrix, {10, 720, 0});
+        translateMatrix(modelMatrix, {10, 900, 0});
         rotateMatrix(modelMatrix, {180.0f, 0.0f, 0.f});
+        scaleMatrix(modelMatrix, 1.f);
         gl::loadUniform(m_quadShader.modelLocation, modelMatrix);
         d.draw();
     }

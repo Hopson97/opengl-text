@@ -2,12 +2,8 @@
 
 in vec2 passTexCoord;
 out vec4 outColour;
-uniform sampler2D tex;
+uniform sampler2D text;
 
 void main() {
-    outColour = texture(tex, passTexCoord);
-
-    if (outColour.a < 0.1) {
-        discard;
-    }
+    outColour = texture(text, passTexCoord);
 }
